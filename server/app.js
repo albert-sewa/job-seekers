@@ -64,7 +64,7 @@ app.get("/api/meta", (req, res) => {
     sources: Object.values(SOURCES).map((s) => ({ id: s.id, label: s.label, needsKey: s.needsKey })),
     passwordRequired: Boolean(process.env.APP_PASSWORD),
     serverKeys: { anthropic: Boolean(process.env.ANTHROPIC_API_KEY), rapidapi: Boolean(process.env.RAPIDAPI_KEY) },
-    hosted: Boolean(process.env.VERCEL),
+    hosted: Boolean(process.env.VERCEL || process.env.RENDER || process.env.RAILWAY_ENVIRONMENT || process.env.FLY_APP_NAME || process.env.HOSTED),
   });
 });
 

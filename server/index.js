@@ -10,6 +10,10 @@ import { app, finalize, PUBLIC_DIR } from "./app.js";
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 const PREFERRED_PORT = Number(process.env.PORT) || 4747;
+// Hosting platforms (Render, Railway, Fly…) set PORT and need 0.0.0.0; the
+// local launcher stays loopback-only.
+const HOSTED = Boolean(process.env.RENDER || process.env.RAILWAY_ENVIRONMENT || process.env.FLY_APP_NAME || process.env.HOSTED);
+const HOST = HOSTED ? "0.0.0.0" : "127.0.0.1";
 
 app.use(express.static(PUBLIC_DIR, { extensions: ["html"] }));
 
@@ -30,16 +34,16 @@ app.get("/api/legacy", (req, res) => {
 finalize();
 
 function listen(port, attempt = 0) {
-  const server = app.listen(port, "127.0.0.1", () => {
+  const server = app.listen(port, HOST, () => {
     const url = `http://localhost:${port}`;
     console.log(`\n  Job Seek is running at ${url}\n  Press Ctrl+C to stop.\n`);
-    if (!process.argv.includes("--no-open")) {
+    if (!HOSTED && !process.argv.includes("--no-open")) {
       const opener = { darwin: `open ${url}`, win32: `start "" ${url}`, linux: `xdg-open ${url}` }[process.platform];
       if (opener) exec(opener);
     }
   });
   server.on("error", (err) => {
-    if (err.code === "EADDRINUSE" && attempt < 10) {
+    if (err.code === "EADDRINUSE" && attempt < 10 && !HOSTED) {
       console.log(`Port ${port} is busy, trying ${port + 1}…`);
       listen(port + 1, attempt + 1);
     } else {

@@ -24,6 +24,15 @@ npm start
 
 ## Hosted version (no install for friends)
 
+### Render (free web service)
+
+Render → **New → Web Service** → connect this GitHub repo. Settings:
+Runtime **Node**, Build command `npm install`, Start command `npm start`,
+Instance type **Free**. Nothing else is needed. (Free instances sleep after
+15 minutes idle; the first visit afterwards takes ~30–60 s to wake up.)
+
+### Vercel
+
 The same app runs on Vercel so friends can use it from any browser — including
 locked-down work laptops. Each person's keys, CV profile and tracker are kept
 in their own browser; the server stores nothing.
