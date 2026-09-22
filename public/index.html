@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Seek</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f766e'/%3E%3Ccircle cx='14' cy='14' r='6.5' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M19 19l6 6' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">Job Seek</span>
+      </div>
+      <nav class="nav">
+        <button class="nav-item is-active" data-view="search">
+          <svg viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Search
+        </button>
+        <button class="nav-item" data-view="tracker">
+          <svg viewBox="0 0 20 20"><rect x="2.5" y="3" width="4.5" height="14" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="8.5" y="3" width="4.5" height="9" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="14.5" y="3" width="3" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          Tracker <span class="nav-badge" id="tracker-count" hidden></span>
+        </button>
+        <button class="nav-item" data-view="profile">
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 17c.8-3.4 3.3-5 6.5-5s5.7 1.6 6.5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          My CV
+        </button>
+        <button class="nav-item" data-view="settings">
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.5v2.2M10 15.3v2.2M2.5 10h2.2M15.3 10h2.2M4.7 4.7l1.6 1.6M13.7 13.7l1.6 1.6M4.7 15.3l1.6-1.6M13.7 6.3l1.6-1.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Settings
+        </button>
+      </nav>
+      <div class="sidebar-foot">
+        <div id="sidebar-profile" class="sidebar-profile"></div>
+        <div class="sidebar-usage" id="sidebar-usage"></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- ===== Search ===== -->
+      <section class="view" id="view-search">
+        <form class="searchbar" id="search-form" autocomplete="off">
+          <div class="field field-query">
+            <label for="q">Role or keywords</label>
+            <input id="q" name="query" placeholder="e.g. data analyst, accountant, marketing executive" required />
+            <div class="suggest" id="suggest" hidden></div>
+          </div>
+          <div class="field field-location">
+            <label for="loc">Location</label>
+            <input id="loc" name="location" placeholder="Singapore" />
+          </div>
+          <button type="submit" class="btn btn-primary btn-search" id="search-btn">Search</button>
+          <button type="button" class="btn btn-search" id="for-me-btn" title="Jobs matched to your CV" hidden>✦ For me</button>
+        </form>
+
+        <div class="filters" id="filters">
+          <div class="filter-group">
+            <span class="filter-label">Job type</span>
+            <div class="chips" data-filter="employmentTypes">
+              <button type="button" class="chip" data-value="Full-time">Full-time</button>
+              <button type="button" class="chip" data-value="Contract">Contract</button>
+              <button type="button" class="chip" data-value="Part-time">Part-time</button>
+              <button type="button" class="chip" data-value="Internship">Internship</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Level</span>
+            <div class="chips" data-filter="experienceLevels">
+              <button type="button" class="chip" data-value="Entry">Entry</button>
+              <button type="button" class="chip" data-value="Mid">Mid</button>
+              <button type="button" class="chip" data-value="Senior">Senior</button>
+              <button type="button" class="chip" data-value="Executive">Executive</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Work</span>
+            <div class="chips chips-single" data-filter="workArrangement">
+              <button type="button" class="chip is-on" data-value="any">Any</button>
+              <button type="button" class="chip" data-value="remote">Remote</button>
+              <button type="button" class="chip" data-value="hybrid">Hybrid</button>
+              <button type="button" class="chip" data-value="onsite">On-site</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Posted</span>
+            <select id="datePosted" class="select">
+              <option value="all">Any time</option>
+              <option value="today">Today</option>
+              <option value="3days">Last 3 days</option>
+              <option value="week">Last week</option>
+              <option value="month">Last month</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Salary / month</span>
+            <div class="salary-inputs">
+              <input id="salaryMin" type="number" min="0" step="100" placeholder="Min" class="input-sm" />
+              <span class="dash">–</span>
+              <input id="salaryMax" type="number" min="0" step="100" placeholder="Max" class="input-sm" />
+            </div>
+          </div>
+          <div class="filter-group filter-group-grow">
+            <span class="filter-label">Exclude</span>
+            <input id="excludeKeywords" placeholder="agency, commission-only, …" class="input-sm input-grow" />
+          </div>
+          <div class="filter-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="clear-filters">Clear</button>
+          </div>
+        </div>
+
+        <div id="search-empty" class="empty-state"></div>
+
+        <div id="results-wrap" hidden>
+          <div class="results-toolbar">
+            <div class="results-summary" id="results-summary"></div>
+            <div class="results-controls">
+              <label class="toggle"><input type="checkbox" id="show-hidden" /> Show hidden</label>
+              <label class="sort-label">Sort
+                <select id="sort" class="select select-sm">
+                  <option value="match">Best match</option>
+                  <option value="relevance">Relevance</option>
+                  <option value="newest">Newest</option>
+                  <option value="salary">Salary</option>
+                </select>
+              </label>
+              <button type="button" class="btn btn-ghost btn-sm" id="save-search-btn" title="Save this search to re-run later">☆ Save search</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="refresh-btn" title="Bypass cache and fetch fresh results (uses API quota)">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="source-status" id="source-status"></div>
+          <div class="score-progress" id="score-progress" hidden></div>
+          <div class="results" id="results"></div>
+          <div class="deeplinks" id="deeplinks"></div>
+        </div>
+      </section>
+
+      <!-- ===== Tracker ===== -->
+      <section class="view" id="view-tracker" hidden>
+        <header class="view-header">
+          <h1>Application tracker</h1>
+          <p class="muted">Drag cards between columns, or change the status inside a card. Notes are saved automatically.</p>
+        </header>
+        <div class="board" id="board"></div>
+      </section>
+
+      <!-- ===== Profile ===== -->
+      <section class="view" id="view-profile" hidden>
+        <header class="view-header">
+          <h1>My CV</h1>
+          <p class="muted">Upload your CV once. Claude reads it to suggest searches, score every result, and analyse gaps for jobs you pick.</p>
+        </header>
+        <div id="profile-content"></div>
+      </section>
+
+      <!-- ===== Settings ===== -->
+      <section class="view" id="view-settings" hidden>
+        <header class="view-header">
+          <h1>Settings</h1>
+          <p class="muted">Keys are stored only in the <code>data/</code> folder on this Mac and are never shown again in full.</p>
+        </header>
+        <div id="settings-content"></div>
+      </section>
+    </main>
+
+    <!-- Detail drawer -->
+    <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+    <aside class="drawer" id="drawer" hidden>
+      <div class="drawer-inner" id="drawer-content"></div>
+    </aside>
+
+    <div class="toast-stack" id="toasts"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

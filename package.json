@@ -1,0 +1,16 @@
+{
+  "name": "job-seek",
+  "version": "1.0.0",
+  "description": "Job search aggregator with CV-based AI matching. Runs locally or on Vercel.",
+  "private": true,
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.127.0",
+    "express": "^5.2.1",
+    "zod": "^4.6.5"
+  }
+}

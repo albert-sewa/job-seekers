@@ -1,0 +1,7 @@
+data/
+node_modules/
+.claude/
+*.zip
+Start Job Seek.command
+Start Job Seek.bat
+README.md
