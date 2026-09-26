@@ -80,7 +80,7 @@ app.post("/api/search", async (req, res) => {
 // "Jobs for you": the browser sends the top CV-suggested queries; we run and merge them.
 app.post("/api/search/suggested", async (req, res) => {
   const settings = requestSettings(req);
-  const queries = (Array.isArray(req.body?.queries) ? req.body.queries : []).map((q) => String(q || "").trim()).filter(Boolean).slice(0, 3);
+  const queries = [...new Set((Array.isArray(req.body?.queries) ? req.body.queries : []).map((q) => String(q || "").trim()).filter(Boolean))].slice(0, 5);
   if (!queries.length) return res.status(400).json({ error: "No suggested searches — upload a CV first." });
   const location = String(req.body?.location || settings.defaultLocation).trim();
 

@@ -75,8 +75,9 @@ const ProfileSchema = z.object({
   targetRoles: z.array(z.string()).describe("5-8 job titles this person is a realistic fit for right now"),
   suggestedSearches: z.array(z.object({
     query: z.string().describe("Short search query to type into a job board, 2-4 words"),
+    industry: z.string().describe("Which of the candidate's industries/sectors this search targets, or 'Any' for an industry-neutral title"),
     reason: z.string().describe("One sentence on why this search suits the candidate"),
-  })).describe("6-8 concrete searches, ordered from best fit to stretch"),
+  })).describe("6-8 concrete searches covering EVERY industry in the candidate's background plus industry-neutral titles, best fit first"),
   strengths: z.array(z.string()).describe("3-5 selling points to emphasise"),
   developmentAreas: z.array(z.string()).describe("2-4 gaps that commonly block them from stronger roles"),
 });
@@ -92,6 +93,8 @@ export async function extractProfile(cvText, settings) {
       "Read the CV and extract a faithful structured profile. Do not invent skills or experience that aren't in the CV.",
       "For suggestedSearches, think about which job titles the Singapore / Southeast Asia market actually uses, and include both the candidate's obvious next role and one or two adjacent roles they could credibly pivot into.",
       "Search queries must be job titles or title + specialism only (e.g. 'Product Analyst' or 'Senior Data Analyst fintech') — never include a city or country, the location is chosen separately.",
+      "CRITICAL — cover the candidate's whole background, not just one industry: list every distinct industry or sector in the CV, then make sure the searches span all of them. The most recent employer, or the industry that happens to appear most often, must NOT dominate the list.",
+      "Lead with 2-3 industry-NEUTRAL job titles (industry: 'Any') that work across all their sectors, then at most ONE search per specific industry. Never give two searches naming the same industry.",
     ].join(" "),
     messages: [{ role: "user", content: `CV text:\n\n${cvText}` }],
   });
@@ -167,7 +170,9 @@ export async function scoreJobs(profile, cvText, jobs, settings, onBatch) {
         output_config: { format: zodOutputFormat(ScoreSchema) },
         system: [
           "You are a pragmatic recruiter scoring how well a candidate fits each job posting.",
-          "Score on: required skills and tools match, seniority and years of experience fit, domain/industry relevance, and any hard blockers (e.g. licences, citizenship, language requirements, or the role being far more senior/junior).",
+          "Score primarily on: required skills and tools match, seniority and years of experience fit, and hard blockers (e.g. licences, citizenship, language requirements, or the role being far more senior/junior).",
+          "Industry is a secondary factor, and the candidate's ENTIRE industry history counts equally — a job in any sector they have worked in is an industry match, not just their most recent or most frequent one. Do not push jobs from one favoured industry to the top: two jobs with the same role fit, in two different industries the candidate has worked in, must score the same.",
+          "Where the candidate's core skills transfer cleanly (e.g. B2B sales, account management, analysis), a role in an industry that is new to them can still score 'good'; deduct for industry only when the posting genuinely requires sector-specific knowledge, licensing or an existing client network.",
           "Be discriminating: most jobs should not score above 80. A role requiring skills the candidate has never used should be 'partial' at best.",
           "Return one score object for every job id you are given, in the same order.",
         ].join(" "),

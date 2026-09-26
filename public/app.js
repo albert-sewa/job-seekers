@@ -492,10 +492,34 @@
     }
   }
 
-  // "Jobs for you": the top CV-suggested searches, run together and merged.
+  // Pick the searches to run for "Jobs for you", one per industry first so a
+  // single sector from the CV can't take every slot.
+  const FOR_ME_QUERIES = 4;
+
+  function forMeQueries() {
+    const all = db.profile?.profile?.suggestedSearches || [];
+    const buckets = new Map();
+    for (const s of all) {
+      const key = String(s.industry || "any").trim().toLowerCase();
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(s.query);
+    }
+    // Round-robin across industries: one from each before taking a second.
+    const picked = [];
+    const lists = [...buckets.values()];
+    for (let round = 0; picked.length < FOR_ME_QUERIES && lists.some((l) => l.length > round); round++) {
+      for (const list of lists) {
+        if (picked.length >= FOR_ME_QUERIES) break;
+        if (list[round]) picked.push(list[round]);
+      }
+    }
+    return picked.length ? picked : all.slice(0, FOR_ME_QUERIES).map((s) => s.query);
+  }
+
+  // "Jobs for you": a spread of CV-suggested searches, run together and merged.
   async function runSuggested({ forceRefresh = false } = {}) {
     if (!db.profile) { showView("profile"); return; }
-    const queries = (db.profile.profile.suggestedSearches || []).slice(0, 3).map((s) => s.query);
+    const queries = forMeQueries();
     const filters = { ...readParams(), query: undefined };
     showView("search");
     const seq = beginSearch("Finding jobs that match your CV…");
@@ -1118,7 +1142,7 @@
         <div>
           <div class="panel">
             <h2>Suggested searches <button class="btn btn-primary btn-sm" data-for-me>✦ Show jobs for me</button></h2>
-            <div class="suggest-grid">${pr.suggestedSearches.map((s) => `<button class="suggest-card" data-q="${esc(s.query)}"><span class="q">${esc(s.query)}</span><span class="w">${esc(s.reason)}</span></button>`).join("")}</div>
+            <div class="suggest-grid">${pr.suggestedSearches.map((s) => `<button class="suggest-card" data-q="${esc(s.query)}"><span class="q">${esc(s.query)}${s.industry && s.industry.toLowerCase() !== "any" ? ` <span class="tag">${esc(s.industry)}</span>` : ""}</span><span class="w">${esc(s.reason)}</span></button>`).join("")}</div>
           </div>
           <div class="panel"><h2>Roles you fit</h2><div class="skills">${pr.targetRoles.map((r) => `<span class="tag">${esc(r)}</span>`).join("")}</div></div>
           <div class="panel"><h2>Strengths to sell</h2><ul class="list">${pr.strengths.map((s) => `<li>${esc(s)}</li>`).join("")}</ul></div>
